@@ -18,7 +18,7 @@ entries:
     - hhttps://egimbernat.github.io/wasmcloud-otp
     type: application
     urls:
-    - https://github.com/egimbernat/wasmcloud-otp/archive/refs/tags/wasmcloud-host-0.5.1.tar.gz
+    - https://github.com/egimbernat/wasmcloud-otp/releases/download/wasmcloud-host-0.5.1/wasmcloud-host-0.5.1.tgz
     version: 0.5.1
   - apiVersion: v2
     appVersion: 0.54.1
