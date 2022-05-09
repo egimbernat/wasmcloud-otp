@@ -33,6 +33,7 @@ wasmcloud:
     # names, so the `.` character is not allowed
     hostLabels:
       kubernetes: "true"
+    extraEnv: []
   # Enables support for the Kubernetes Applier provider. Essentially, this generates a role and role
   # binding for the pod service account that allows it to get, create, update, delete, and patch
   # service resources if you start the kubernetes applier on one of these hosts. Enabling this

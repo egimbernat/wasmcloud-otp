@@ -134,6 +134,10 @@ spec:
             - name: HOST_{{ $k }}
               value: {{ $v | quote }}
             {{- end }}
+            {{- range $k, $v := .Values.wasmcloud.config.extraEnv }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
           ports:
             - name: washboard
               containerPort: 4000
