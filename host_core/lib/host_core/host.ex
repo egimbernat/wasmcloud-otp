@@ -365,7 +365,7 @@ defmodule HostCore.Host do
 
   def rpc_timeout() do
     case :ets.lookup(:config_table, :config) do
-      [config: config_map] -> config_map[:rpc_timeout]
+      [config: config_map] -> config_map[:rpc_timeout_ms]
       _ -> 2_000
     end
   end
@@ -388,12 +388,12 @@ defmodule HostCore.Host do
   end
 
   def generate_hostinfo_for(provider_key, link_name, instance_id, config_json) do
-    {url, jwt, seed, tls, timeout, structured_logging_enabled} =
+    {url, jwt, seed, tls, timeout, enable_structured_logging} =
       case :ets.lookup(:config_table, :config) do
         [config: config_map] ->
           {"#{config_map[:prov_rpc_host]}:#{config_map[:prov_rpc_port]}",
            config_map[:prov_rpc_jwt], config_map[:prov_rpc_seed], config_map[:prov_rpc_tls],
-           config_map[:rpc_timeout], config_map[:enable_structured_logging]}
+           config_map[:rpc_timeout_ms], config_map[:enable_structured_logging]}
 
         _ ->
           {"127.0.0.1:4222", "", "", 2000, false}
@@ -423,10 +423,16 @@ defmodule HostCore.Host do
       cluster_issuers: cluster_issuers(),
       invocation_seed: cluster_seed(),
       # In case providers want to be aware of this for their own logging
-      structured_logging_enabled: structured_logging_enabled
+      enable_structured_logging: to_bool(enable_structured_logging)
     }
     |> Jason.encode!()
   end
+
+  defp to_bool(val) when is_binary(val), do: String.downcase(val) == "true"
+
+  defp to_bool(val) when is_boolean(val), do: val
+
+  defp to_bool(_), do: false
 
   defp normalize_prefix("bindle://" <> _str = s) do
     s

@@ -7,6 +7,12 @@
 # General application configuration
 import Config
 
+config :opentelemetry, :resource, service: %{name: "wasmcloud"}
+
+config :opentelemetry,
+  span_processor: :batch,
+  traces_exporter: :none
+
 # Configures the endpoint
 config :wasmcloud_host, WasmcloudHostWeb.Endpoint,
   url: [host: "localhost"],
@@ -18,7 +24,8 @@ config :wasmcloud_host, WasmcloudHostWeb.Endpoint,
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id]
+  metadata: [:request_id, :span_id, :trace_id],
+  device: :standard_error
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
@@ -52,7 +59,7 @@ config :esbuild,
 
 # Configure Dart for scss support
 config :dart_sass,
-  version: "1.49.0"
+  version: "1.52.1"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

@@ -9,6 +9,8 @@ defmodule HostCore do
     config = Vapor.load!(HostCore.ConfigPlan)
     config = post_process_config(config)
 
+    OpentelemetryLoggerMetadata.setup()
+
     children = mount_supervisor_tree(config)
 
     opts = [strategy: :one_for_one, name: HostCore.Supervisor]
@@ -18,7 +20,10 @@ defmodule HostCore do
     if config.enable_structured_logging do
       :logger.add_handler(:structured_logger, :logger_std_h, %{
         formatter: {HostCore.StructuredLogger.FormatterJson, []},
-        level: config.structured_log_level
+        level: config.structured_log_level,
+        config: %{
+          type: :standard_error
+        }
       })
 
       :logger.remove_handler(Logger)
@@ -36,6 +41,7 @@ defmodule HostCore do
     [
       {Registry, keys: :unique, name: Registry.ProviderRegistry},
       {Registry, keys: :duplicate, name: Registry.ActorRegistry},
+      {Registry, keys: :unique, name: Registry.ActorRpcSubscribers},
       {Registry,
        keys: :duplicate,
        name: Registry.EventMonitorRegistry,
@@ -48,6 +54,7 @@ defmodule HostCore do
         {Gnat.ConnectionSupervisor, HostCore.Nats.rpc_connection_settings(config)},
         id: :rpc_connection_supervisor
       ),
+      {HostCore.Actors.ActorRpcSupervisor, strategy: :one_for_one},
       {HostCore.Providers.ProviderSupervisor, strategy: :one_for_one, name: ProviderRoot},
       {HostCore.Actors.ActorSupervisor,
        strategy: :one_for_one,
@@ -90,6 +97,7 @@ defmodule HostCore do
          }},
         id: :cacheloader_consumer_supervisor
       ),
+      {HostCore.Actors.CallCounter, nil},
       {HostCore.Host, config},
       {HostCore.HeartbeatEmitter, config},
       {HostCore.Jetstream.Client, config}

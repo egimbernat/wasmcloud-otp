@@ -30,6 +30,11 @@ defmodule HostCore.E2E.KVCounterTest do
 
   test "kvcounter roundtrip", %{:evt_watcher => evt_watcher} do
     on_exit(fn -> HostCore.Host.purge() end)
+
+    # uncomment the before and after delays if you want this test to
+    # reliably emit trace exports
+    # :timer.sleep(6000)
+
     {:ok, bytes} = File.read(@kvcounter_path)
     {:ok, _pid} = HostCore.Actors.ActorSupervisor.start_actor(bytes)
 
@@ -108,8 +113,9 @@ defmodule HostCore.E2E.KVCounterTest do
     assert actor_count == 1
 
     ap = HostCore.Providers.ProviderSupervisor.all_providers()
-    assert elem(Enum.at(ap, 0), 1) == @httpserver_key
-    assert elem(Enum.at(ap, 1), 1) == @redis_key
+    assert length(ap) == 2
+    assert Enum.any?(ap, fn {_, p, _, _, _} -> p == @httpserver_key end)
+    assert Enum.any?(ap, fn {_, p, _, _, _} -> p == @redis_key end)
 
     {:ok, _okay} = HTTPoison.start()
     {:ok, resp} = request_http("http://localhost:8081/foobar", 5)
@@ -118,6 +124,8 @@ defmodule HostCore.E2E.KVCounterTest do
     incr_count = Map.get(body, "counter") + 1
     {:ok, resp} = request_http("http://localhost:8081/foobar", 2)
     assert resp.body == "{\"counter\":#{incr_count}}"
+
+    # :timer.sleep(6000)
   end
 
   test "kvcounter unprivileged access denied", %{:evt_watcher => evt_watcher} do
@@ -206,7 +214,7 @@ defmodule HostCore.E2E.KVCounterTest do
     {:ok, resp} = request_http("http://localhost:8082/foobar", 10)
 
     assert resp.body ==
-             "{\"error\":\"Host send error Invocation not authorized: missing claim for wasmcloud:keyvalue\"}"
+             "{\"error\":\"Host send error Invocation not authorized: missing capability claim for wasmcloud:keyvalue\"}"
 
     assert resp.status_code == 500
   end

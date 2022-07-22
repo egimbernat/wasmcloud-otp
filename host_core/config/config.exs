@@ -14,4 +14,17 @@ import Config
 # Configuration from the imported file will override the ones defined
 # here (which is why it is important to import them last).
 #
+
+config :logger, :console,
+  format: "$time $metadata[$level] $message\n",
+  level: :info,
+  metadata: [:span_id, :trace_id],
+  device: :standard_error
+
+config :opentelemetry, :resource, service: %{name: "wasmcloud"}
+
+config :opentelemetry,
+  span_processor: :batch,
+  traces_exporter: :none
+
 import_config "#{config_env()}.exs"

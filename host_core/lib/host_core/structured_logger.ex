@@ -66,13 +66,20 @@ defmodule HostCore.StructuredLogger.FormatterJson do
       mfa = encode_meta(meta)
       encoded_msg = encode_msg(msg)
 
-      x =
-        log_to_map(level, meta)
-        |> Map.merge(mfa)
-        |> Map.merge(encoded_msg)
-        |> scrub
+      case encoded_msg do
+        # Ignore unsupported encoding
+        nil ->
+          []
 
-      [Jason.encode_to_iodata!(x), "\n"]
+        _ ->
+          x =
+            log_to_map(level, meta)
+            |> Map.merge(mfa)
+            |> Map.merge(encoded_msg)
+            |> scrub
+
+          [Jason.encode_to_iodata!(x), "\n"]
+      end
     rescue
       e ->
         # Give a full dump here
@@ -89,14 +96,20 @@ defmodule HostCore.StructuredLogger.FormatterJson do
 
   defp encode_msg({:string, string}), do: %{"msg" => string}
 
+  # Reports are unused and unsupported, ignore
   defp encode_msg({:report, _report}),
-    do: %{"msg" => "reports are unused"}
+    do: nil
 
   defp encode_msg({format, terms}),
     do: %{"msg" => format |> Logger.Utils.scan_inspect(terms, :infinity) |> :io_lib.build_text()}
 
-  defp encode_meta(%{mfa: {m, f, a}}), do: %{mfa: "#{inspect(m)}.#{f}/#{a}"}
-  # defp encode_meta(_m), do: %{}
+  defp encode_msg(_unsupported), do: nil
+
+  defp encode_meta(%{mfa: {m, f, a}}) do
+    %{mfa: "#{inspect(m)}.#{f}/#{a}"}
+  end
+
+  defp encode_meta(_m), do: %{}
 
   # https://github.com/elixir-metadata-logger/metadata_logger
   @spec log_to_map(Logger.level(), list[keyword]) :: map()

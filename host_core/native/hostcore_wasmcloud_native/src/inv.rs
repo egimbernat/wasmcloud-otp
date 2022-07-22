@@ -101,7 +101,7 @@ impl Invocation {
     /// Produces a host-signed invocation that is used to halt anything that can receive invocations. This invocation
     /// has both an origin and a target of SYSTEM_ACTOR. This has a net effect of making this invocation unroutable
     /// across a lattice, and therefore can only be produced internally. In other words, a remote host can't fabricate
-    /// a halt invocation and send it to a provider or actor
+    /// a halt invocation and send it to a provider or actor    
     #[allow(unused)]
     pub fn halt(hostkey: &KeyPair) -> Invocation {
         let subject = format!("{}", Uuid::new_v4());
@@ -125,7 +125,7 @@ impl Invocation {
             msg: vec![],
             id: subject,
             encoded_claims: claims.encode(hostkey).unwrap(),
-            host_id: issuer,
+            host_id: issuer,            
         }
     }
 

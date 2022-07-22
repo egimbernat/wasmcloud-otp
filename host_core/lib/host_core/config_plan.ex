@@ -27,7 +27,8 @@ defmodule HostCore.ConfigPlan do
           {:rpc_host, "WASMCLOUD_RPC_HOST", required: false},
           {:rpc_port, "WASMCLOUD_RPC_PORT", required: false, map: &String.to_integer/1},
           {:rpc_seed, "WASMCLOUD_RPC_SEED", required: false},
-          {:rpc_timeout, "WASMCLOUD_RPC_TIMEOUT_MS", required: false, map: &String.to_integer/1},
+          {:rpc_timeout_ms, "WASMCLOUD_RPC_TIMEOUT_MS",
+           required: false, map: &String.to_integer/1},
           {:rpc_jwt, "WASMCLOUD_RPC_JWT", required: false},
           {:rpc_tls, "WASMCLOUD_RPC_TLS", required: false, map: &String.to_integer/1},
           {:prov_rpc_host, "WASMCLOUD_PROV_RPC_HOST", required: false},
@@ -53,7 +54,8 @@ defmodule HostCore.ConfigPlan do
           {:config_service_enabled, "WASMCLOUD_CONFIG_SERVICE", required: false},
           {:enable_structured_logging, "WASMCLOUD_STRUCTURED_LOGGING_ENABLED", required: false},
           {:structured_log_level, "WASMCLOUD_STRUCTURED_LOG_LEVEL",
-           required: false, map: &string_to_loglevel/1}
+           required: false, map: &string_to_loglevel/1},
+          {:enable_ipv6, "WASMCLOUD_ENABLE_IPV6", required: false, map: &String.to_integer/1}
         ]
       }
     ]
@@ -66,7 +68,7 @@ defmodule HostCore.ConfigPlan do
       {:rpc_host, "rpc_host", required: false, default: "127.0.0.1"},
       {:rpc_port, "rpc_port", required: false, default: 4222},
       {:rpc_seed, "rpc_seed", required: false, default: ""},
-      {:rpc_timeout, "rpc_timeout_ms", required: false, default: 2000},
+      {:rpc_timeout_ms, "rpc_timeout_ms", required: false, default: 2000},
       {:rpc_jwt, "rpc_jwt", required: false, default: ""},
       {:rpc_tls, "rpc_tls", required: false, default: 0},
       {:prov_rpc_host, "prov_rpc_host", required: false, default: "127.0.0.1"},
@@ -87,7 +89,8 @@ defmodule HostCore.ConfigPlan do
       {:js_domain, "js_domain", required: false, default: nil},
       {:config_service_enabled, "config_service_enabled", required: false, default: ""},
       {:enable_structured_logging, "structured_logging_enabled", required: false, default: false},
-      {:structured_log_level, "structured_log_level", required: false, default: :info}
+      {:structured_log_level, "structured_log_level", required: false, default: :info},
+      {:enable_ipv6, "enable_ipv6", required: false, default: 0}
     ]
   end
 
